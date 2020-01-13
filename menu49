@@ -1,0 +1,2327 @@
+#!/system/bin/sh
+
+clear
+dir="/data/local/binary"
+export PATH=/data/local/binary:$PATH
+
+main_menu(){
+echo -en "\E[32;1m"
+MENU=(
+             "$(sed '/menu_01=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+             "$(sed '/menu_02=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+             "$(sed '/menu_03=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+             "$(sed '/menu_04=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+             "$(sed '/menu_05=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+             "$(sed '/menu_06=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+             "$(sed '/menu_07=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+             "$(sed '/menu_08=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+             "$(sed '/menu_09=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+             "$(sed '/menu_10=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+             "$(sed '/menu_11=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+             "$(sed '/menu_12=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+             "$(sed '/menu_13=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+)
+echo
+echo "$(sed '/menu_menu=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+echo "$(sed '/menu_version=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")" "4.9"
+echo "               -------------"
+echo
+echo "$(sed '/menu_enter=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+echo
+echo -en "\E[37;1m"
+
+select menu in "${MENU[@]}"; do
+    case $REPLY in
+         1) clear
+            my1(){
+            echo
+            echo "$(sed '/menu_01_title=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+             echo
+             echo "$(sed '/menu_01_note=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+             echo
+             MENU1=(
+            "$(sed '/menu_01_01=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+            "$(sed '/menu_01_02=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+            "$(sed '/menu_01_03=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+            "$(sed '/menu_01_04=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+            "$(sed '/menu_01_05=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+             )
+            select img in "${MENU1[@]}"; do
+            case $REPLY in 
+                     1 ) clear
+                         bootext
+                         main_menu
+                         break ;;
+                     2 ) clear
+                         cd /data/local/UnpackerContexts
+                         if [ -f ./file_contexts ]; then
+                             $dir/sefcontext_compile -o ./file_contexts_new.bin ./file_contexts
+                             if [ $(echo $?) -eq 0 ] ; then
+                                echo
+                                echo "$(sed '/menu_01_complete=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+                                echo
+                            else
+                                echo
+                                echo "$(sed '/menu_01_error=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+                                echo
+                            fi
+                        else
+                            echo 
+                            echo "$(sed '/menu_01_filenotfound=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")"
+                            echo
+                        fi
+                         cd
+                         main_menu
+                         break ;;
+                   3 ) clear
+                         /data/local/binary/install_sef.sh >/dev/nul
+                         main_menu
+                         break ;;
+                  4 ) clear
+                         main_menu
+                         break ;;
+                  5 ) clear
+                         break ;;
+                  *) echo "$(sed '/menu_01_anykey=/!d;s/.*=//' "/data/local/Unpacker_lang/ru.lang")" ;;
+                  "") echo "Enter Key"; break;;
+            esac
+    done
+    }
+my1
+break ;;
+         2) clear
+             my_aik(){
+             #if [ -f "$(busybox which aik)" -a -d /data/local/AIK-mobile ]; then
+            cd /data/local/AIK-mobile
+             echo
+             echo "         Меню: AIK-mobile"
+             echo
+             echo "    Положите boot.img в папку: /data/local/AIK-mobile"
+             echo
+select img in "Распаковать boot(recovery)" "Упаковать boot(recovery)" "Очистка рабочей папки: /data/local/AIK-mobile" "Полное удаление AIK-mobile с телефона" "Выход в главное меню" "Завершение работы"; do
+case $REPLY in 
+         1 ) clear
+             my_sel_boot(){
+
+cd /data/local/AIK-mobile
+b=$(busybox find . -maxdepth 1 -name '*.img' -o -name '*.sin' -o -name '*.elf' -o -name '*.bin' -o -name '*.lz4' -type f)
+
+set -- $b
+
+if [ ! -z "$b" ]; then
+echo
+echo ".....Выберите файл для распаковки:"
+echo
+select menu in $b "Выход в Меню: AIK-mobile"; do
+case $REPLY in
+    [1-9]|[1-9][0-9]) i="$#"
+                      let i=i+1
+                      file=$(echo "$@" | busybox cut -d' ' -f"$REPLY")
+         if [ ! -z "$file" -a "$REPLY" -lt "$i" ]; then
+         clear
+         outfile=$(echo "$file" | busybox awk -F".lz4" '{ print $1 }')
+         if [ ! -z "$(echo "$file" | busybox grep -o '.lz4$')" ]; then
+         lz4 -df "$file"
+         ./unpackimg.sh "$outfile"
+         else
+         ./unpackimg.sh "$file"
+         fi
+         main_menu
+         return
+         break 
+         elif [ "$REPLY" == "$i" ]; then
+         clear
+        my_aik
+        return
+        break
+        else
+        clear
+        echo
+            echo "      Вводите цифры, соответствующие меню."
+         my_sel_boot
+         return
+         break
+         fi
+         break;;
+      *) clear
+         echo
+            echo "      Вводите цифры, соответствующие меню."
+         my_sel_boot
+         return
+         break;;
+  esac
+ done
+ else
+ echo
+ echo ....."В папке нет файлов для распаковки."
+ echo
+ my_aik
+ return
+ fi
+return
+}
+ my_sel_boot
+ break
+             my_aik
+             break ;;
+         2 ) clear
+             ./repackimg.sh
+              if [ -d ./split_img ]; then
+              cd /data/local/AIK-mobile/split_img
+if [ ! -z $(ls | busybox grep -i 'boot' | head -1) ]; then
+cd ..
+mv ./image-new.img ./boot-output.img
+elif [ ! -z $(ls | busybox grep -Ei 'twrp|recovery|cwm' | head -1) ]; then
+cd ..
+mv ./image-new.img ./recovery-output.img
+fi
+fi
+             my_aik
+             break ;;
+         3 ) clear
+             ./cleanup.sh
+              my_aik
+              break ;;
+         4 ) clear
+             del_aik()
+{
+echo
+echo -en "\E[31;47;1m"
+echo "     Удалить AIK-mobile с телефона?     "
+echo
+echo -en "\E[37;0m"
+echo -en "\E[37;1m"
+select img in "Да" "Нет" "Выход в главное меню"; do
+case $REPLY in 
+         1 ) clear
+               /data/local/AIK-mobile/cleanup.sh
+busybox mount -o rw,remount /
+busybox mount -o rw,remount /system
+              find $(echo $PATH | busybox sed 's!:! !g') -name 'aik' -type f | xargs rm -f
+rm -rf /data/local/AIK-mobile
+if [ $(echo $?) -eq 0 ] ; then
+echo
+echo "     AIK-mobile успешно удалён!"
+echo
+fi
+               main_menu
+               break ;;
+         2 ) clear
+               main_menu
+               break ;;
+         3 ) clear
+              main_menu
+               break ;;
+         *) clear
+            echo
+            echo "      Вводите цифры, соответствующие этому меню."
+              del_aik
+              break ;;
+    esac
+done
+return
+}
+del_aik
+break ;;
+         5 ) clear
+              main_menu
+              break;;
+         6 ) clear
+             break ;;
+         *) echo
+            echo "     Вводите цифру, соответствующую пунктам Меню: AIK-mobile" ;;
+    esac
+done
+#else
+#echo
+#echo -en "\E[31;47;1m"
+#echo " Внимание! AIK-mobile не установлен, или файл \"menu\" запущен без ввода \"su\"."
+#echo -en "\E[37;0m"
+#echo -en "\E[37;1m"
+
+#main_menu
+#return
+#fi
+return
+}
+my_aik
+break ;;
+         3) clear
+             my_d()
+{
+             cd
+             echo 
+             echo "...Перейдите в папку где находятся файлы: \".img\", например: cd /sdcard"
+read b && $b
+if [ $(echo $?) -eq 0 ]; then
+clear
+dir_dat=/data/local/binary
+nd=$(echo $b | busybox awk '{ print $2 }' | busybox sed 's!^/!!')
+v=$(busybox find . -maxdepth 1 -name 'vendor*.img' -type f -o -name 'system*.img' -type f | busybox sed 's!./!!')
+
+set -- $v
+
+if [ ! -z "$v" ]; then
+echo
+echo ".....Выберите файл для распаковки:"
+echo
+select menu in $v "Выход в главное меню"; do
+case $REPLY in
+    [1-9]|[1-9][0-9]) i="$#"
+                      let i=i+1
+                      file=$(echo "$@" | busybox cut -d' ' -f"$REPLY")
+         if [ ! -z "$file" -a "$REPLY" -lt "$i" ]; then
+         clear
+         file=/"$nd"/"$file"
+         . ${dir_dat}/unpack_img
+         main_menu
+         return
+         break
+         elif [ "$REPLY" -eq "$i" ]; then
+         clear
+        main_menu
+        return
+        break
+        else
+        clear
+        echo
+            echo "      Вводите цифры, соответствующие меню."
+         my_new
+         return
+         break
+         fi
+         break;;
+      *) clear
+         echo
+            echo "      Вводите цифры, соответствующие меню."
+         my_new
+         return
+         break;;
+  esac
+ done
+ else
+ echo
+ echo ....."В папке \"$nd\" нет образов \".img\" для распаковки."
+ echo
+ main_menu
+return
+ fi
+echo
+else
+echo
+echo .....error: Ошибка перехода в директорию!
+echo
+echo Введите директорию правильно!
+echo
+my_d
+return
+fi
+return
+}
+            my2()
+{
+            echo
+            echo "      Меню: Распаковка .img"
+            echo
+            #echo
+            #echo ".....Перейдите в папку, где находится образ .img, или положите образ в папку: /data/local/UnpackerSystem"
+             #echo
+select img in "Распаковать.img" "Конвертировать .lz4" "Склеить образ из прошивки под Qfil" "Распаковать payload.bin" "Выход в главное меню" "Завершение работы"; do
+case $REPLY in 
+         1 ) busybox clear
+            my_new(){
+
+cd /data/local/UnpackerSystem
+dir=/data/local/binary
+b=$(busybox find . -maxdepth 1 -name 'vendor*.img' -type f -o -name 'system*.img' -type f | busybox sed 's!./!!')
+
+set -- $b
+
+if [ ! -z "$b" ]; then
+echo
+echo ".....Выберите файл для распаковки:"
+echo
+select menu in $b "Ввести путь к папке с образом .img" "Выход в главное меню"; do
+case $REPLY in
+    [1-9]|[1-9][0-9]) i="$#"
+                      j="$#"
+                      let i=i+1
+                      let j=j+2
+                      file=$(echo "$@" | busybox cut -d' ' -f"$REPLY")
+       if [ ! -z "$file" -a "$REPLY" -lt "$i" ]; then
+         busybox clear
+         nd=data/local/UnpackerSystem
+         . ${dir}/unpack_img
+         main_menu
+         return
+         break
+       elif [ "$REPLY" -eq "$i" ]; then
+         clear
+        my_d
+        return
+        break
+       elif [ "$REPLY" -eq "$j" ]; then
+         clear
+        main_menu
+        return
+        break
+       else
+        clear
+        echo
+            echo "      Вводите цифры, соответствующие меню."
+         my_new
+         return
+         break
+         fi
+         break;;
+      *) clear
+         echo
+            echo "      Вводите цифры, соответствующие меню."
+         my_new
+         return
+         break;;
+  esac
+ done
+ else
+            clear
+            echo
+            echo ....."В \"$PWD\" нет образов \".img\" для распаковки."
+            echo
+            my_d
+ fi
+return
+}
+ my_new
+ break;;
+          2 ) clear
+             echo
+            echo "      Меню: Конвертация .lz4"
+            echo
+select img in "Извлечение из .lz4" "Сжатие в .lz4" "Выход в главное меню" "Завершение работы"; do
+case $REPLY in 
+         1 ) clear
+             
+             decomp_lz4()
+{
+              echo
+              echo "..Перейдите в папку где находится файл \".lz4\", например: cd /sdcard"
+read b && $b
+if [ $(echo $?) -eq 0 ]; then
+clear
+dir_dat=/data/local/binary
+nd=$(echo $b | busybox awk '{ print $2 }')
+v=$(busybox find . -maxdepth 1 -name '*.lz4' 2> /dev/null | busybox sed 's!./!!')
+
+konv()
+{
+echo
+         echo ".....Конвертация..."
+         echo
+         lz4 -df --no-sparse "$file"
+         if [ "$?" -eq "0" ]; then
+         echo
+         echo ".....Успешно завершено!"
+         echo
+         return
+         else
+         echo
+         echo ".....Ошибка при конвертации!"
+         echo
+         return
+         fi
+return
+}
+
+set -- $v
+
+if [ ! -z "$v" ]; then
+echo
+echo ".....Выберите файл для конвертации:"
+echo
+select menu in $v "Выход в главное меню"; do
+case $REPLY in
+    [1-9]|[1-9][0-9]) i="$#"
+                      let i=i+1
+                      file=$(echo "$@" | busybox cut -d' ' -f"$REPLY")
+         if [ ! -z "$file" -a "$REPLY" -lt "$i" ]; then
+         clear
+         konv
+         main_menu
+         return
+         break 
+         elif [ "$REPLY" == "$i" ]; then
+         clear
+        main_menu
+        return
+        break
+        else
+        clear
+        echo
+            echo "      Вводите цифры, соответствующие меню."
+         decomp_lz4
+         return
+         break
+         fi
+         break;;
+   *) clear
+        echo
+            echo "      Вводите цифры, соответствующие меню."
+         decomp_lz4
+         return
+         break;;
+  esac
+ done
+ else
+ echo
+ echo ....."В папке \"$nd\" нет файлов \".lz4\" для конвертации."
+ echo
+ main_menu
+return
+ fi
+echo
+else
+echo
+echo .....error: Ошибка перехода в директорию!
+echo
+echo Введите директорию правильно!
+echo
+decomp_lz4
+return
+fi
+return
+}
+decomp_lz4
+  break ;;
+           2) clear
+             
+             comp_lz4()
+{
+              echo
+              echo "..Перейдите в папку где находится файл \".img\", например: cd /sdcard"
+read b && $b
+if [ $(echo $?) -eq 0 ]; then
+clear
+dir_dat=/data/local/binary
+nd=$(echo $b | busybox awk '{ print $2 }')
+v=$(busybox find . -maxdepth 1 -name '*.img' 2> /dev/null | busybox sed 's!./!!')
+konv()
+{
+echo
+         echo ".....Конвертация..."
+         echo
+         lz4 -3 -f "$file"
+         if [ "$?" -eq "0" ]; then
+         echo
+         echo ".....Успешно завершено!"
+         echo
+         return
+         else
+         echo
+         echo ".....Ошибка при конвертации!"
+         echo
+         return
+         fi
+return
+}
+
+my_compress()
+{
+mc(){
+read b
+if [ "$b" -le "9" ]; then
+echo
+echo ".....Конвертация в "$file".lz4...Ждём..."
+echo
+lz4 -"$b" -f $file
+if [ $(echo $?) -eq 0 ] ; then
+echo
+echo ".....Конвертация завершена!"
+echo
+else
+echo
+echo ".....error: Ошибка при конвертации."
+echo
+fi
+else
+echo
+echo ".....Вводите цифру от 0 до 9:"
+mc
+echo
+fi
+return
+}
+
+
+echo
+echo ".....Для конвертации в .lz4 введите степень сжатия(цифру от 0 до 9):"
+mc
+return
+}
+
+set -- $v
+
+if [ ! -z "$v" ]; then
+#if [ "$#" -le "10" ]; then
+echo
+echo ".....Выберите файл для конвертации:"
+echo
+select menu in $v "Выход в главное меню"; do
+case $REPLY in
+    [1-9]|[1-9][0-9]) i="$#"
+                      let i=i+1
+                      file=$(echo "$@" | busybox cut -d' ' -f"$REPLY")
+         if [ ! -z "$file" -a "$REPLY" -lt "$i" ]; then
+         clear
+         my_compress
+         main_menu
+         return
+         break 
+         elif [ "$REPLY" == "$i" ]; then
+         clear
+        main_menu
+        return
+        break
+        else
+        clear
+        echo
+            echo "      Вводите цифры, соответствующие меню."
+         comp_lz4
+         return
+         break
+         fi
+         break;;
+   *) clear
+        echo
+            echo "      Вводите цифры, соответствующие меню."
+         comp_lz4
+         return
+         break ;;
+  esac
+ done
+ else
+ echo
+ echo ....."В папке \"$nd\" нет файлов \".img\" для конвертации."
+ echo
+ main_menu
+return
+fi
+echo
+else
+echo
+echo .....error: Ошибка перехода в директорию!
+echo
+echo Введите директорию правильно!
+echo
+comp_lz4
+return
+fi
+return
+}
+comp_lz4
+  break ;;
+           3) clear
+              main_menu
+              break ;;
+           4) clear
+              break;;
+   esac
+    done
+      break ;;
+         3 ) clear
+
+           resize_img()
+{
+ blockcount=$(tune2fs -l ./$obraz | busybox awk '/Block count/ { print $3 }')
+size=$(stat -c %s ./$obraz)
+size_obraz=$(expr $blockcount \* 4096)
+if [ -f ./$obraz ]; then
+busybox test "$size" -lt "$size_obraz"
+if [ "$?" -eq "0" ]; then
+busybox truncate -s $size_obraz ./$obraz
+echo " .....Получен образ \"$obraz\" с размером: $size_obraz байт."
+else
+echo " .....Получен образ \"$obraz\" с размером: $size байт."
+fi
+fi
+}
+
+             qfil_img()
+{
+echo
+echo "     Положите все файлы \"system_xx\" или \"vendor_xx\", все файлы \".xml\", начинающиеся на \"rawprogram*\" в папку: /data/local/UnpackerQfil."
+echo
+select img in "Склеить" "Выход в главное меню"; do
+case $REPLY in 
+         1 ) clear
+             cd /data/local/UnpackerQfil
+if [ ! -z "$(ls | busybox grep "system_*")" ]; then
+name=system
+obraz=$name.raw.img
+rab_file=$(busybox find -name "rawprogram*" -exec busybox grep -rl "$name" {} \; | busybox sed 's!./!!')
+ if [ -f ./$rab_file ]; then
+echo
+echo ".....Склейка $obraz c использованием файла $rab_file..."
+python3 /data/local/binary/bin_system/qfil1.py /data/local/UnpackerQfil/"$rab_file"
+  if [ "$?" -eq "0" ]; then
+ resize_img
+             else
+             echo ".....Возникла ошибка"
+             echo
+             fi
+            else
+            echo
+            echo "  Нет файла .xml для склейки $obraz"
+             fi
+             else
+            echo
+            echo "  Нет файлов \"system_*\" в папке /data/local/UnpackerQfil."
+             fi
+
+ if [ ! -z "$(ls | busybox grep "vendor_*")" ]; then
+name=vendor
+obraz=$name.raw.img
+rab_file=$(busybox find -name "rawprogram*" -exec busybox grep -rl "$name" {} \; | busybox sed 's!./!!')
+ if [ -f ./$rab_file ]; then
+echo
+echo ".....Склейка $obraz c использованием файла $rab_file..."
+python3 /data/local/binary/bin_system/qfil1.py /data/local/UnpackerQfil/"$rab_file"
+
+if [ "$?" -eq "0" ]; then
+ resize_img
+             else
+             echo ".....Возникла ошибка"
+             echo
+             fi
+       else
+       echo 
+       echo "  Нет файла .xml для склейки $obraz"
+             fi
+       else
+       echo
+            echo "  Нет файлов \"vendor_*\" в папке /data/local/UnpackerQfil."
+             fi
+             
+
+#new
+
+if [ ! -z "$(busybox find . -name 'system.img_sparsechunk.*')" ]; then
+echo
+echo ".....Склейка образа от \"Moto\"..."
+echo
+simg2img ./system.img_sparsechunk.* ./system.img
+if [ "$?" -eq "0" ]; then
+python3 /data/local/binary/fixmoto.py ./system.img ./system.raw.img
+if [ "$?" -eq "0" ]; then
+echo
+echo ".....Получен образ \"system.raw.img\""
+echo
+fi
+else
+echo
+echo ".....Возникла ошибка!"
+echo
+fi
+ #else
+ #echo
+ #echo ".....В папке: \"/data/local/UnpackerQfil\" нет файлов \"system.img_sparsechunk.*\""
+ #echo
+ fi
+
+             main_menu
+             break ;;
+         2 ) clear
+              main_menu
+               break ;;
+         *) clear
+            echo
+            echo "      Вводите цифры, соответствующие этому меню."
+              qfil_img
+              break ;;
+    esac
+done
+return
+}
+qfil_img
+break ;;
+         4 ) clear
+             payload()
+{    
+             cd /data/local/UnpackerPayload  
+             echo
+             echo "      Положите файл "payload.bin" в папку: /data/local/UnpackerPayload"
+echo
+select img in "Распаковать payload.bin" "Выход в главное меню"; do
+case $REPLY in 
+         1 ) clear
+             if [ -f ./payload.bin ]; then
+             echo
+             echo ".....Распаковка payload.bin...Ждём..."
+             echo
+             python3.6 $dir/bin_payload/payload_dumper.py ./payload.bin
+             if [ "$?" -eq "0" ]; then
+             echo
+             echo ".....Успешно распаковано!"
+             echo
+             else
+             echo
+             echo ".....Ошибка распаковки payload.bin!"
+             echo
+             fi
+             else
+             echo
+             echo ".....Нет файла payload.bin в папке: /data/local/UnpackerPayload."
+             fi
+             main_menu
+               break ;;
+         2 ) clear
+              main_menu
+               break ;;
+         *) clear
+            echo
+            echo "      Вводите цифры, соответствующие этому меню."
+              payload
+              break ;;
+    esac
+done
+return
+}
+payload
+break ;;
+         5 ) clear
+             main_menu
+             break ;;
+         6 ) clear
+             break ;;
+         *) echo "Вводите цифру, соответствующую пунктам Меню: Распаковка .img." ;;
+    esac
+done
+return
+}
+my2
+break ;;
+         4) clear
+            my_mount()
+{
+
+ #home_dir="/data/local/UnpackerSystem"
+ cd $home_dir
+ my_dir="/data/local/binary"
+ > $my_dir/mm
+ > $my_dir/spars
+
+ obraz=$(a=$(busybox find "$home_dir" -maxdepth 1 -name 'vendor*.img' -type f -o -name 'system*.img' -type f | busybox sed "s!$home_dir!!")
+ set -- $a
+
+ for v in $a; do
+
+
+
+ if [ "$(echo $v | busybox awk '{ print $3 }' | busybox grep "$v")" != "$(for i in 0 1 2 3 4 5 6 7; do
+      loop=/dev/block/loop$i;
+
+      busybox losetup $loop 2> /dev/null | grep "$v" | busybox awk '{ print $3 }'
+done)" ]; then
+
+ zik=$(echo $v)
+ zik1=$(echo $v | busybox sed "s!$home_dir!!" | busybox sed 's!.img!!')
+ echo "$zik смонтирован в папку: /data/local/$zik1" >> $my_dir/mm
+ else
+ if [ -z "$(busybox hexdump -C -n 20000 "$v" | busybox grep '3a ff 26 ed')" ]; then
+ echo $v
+ else
+ echo $v >> $my_dir/spars
+ fi
+ fi
+ done)
+ set -- $obraz
+
+ if [ -s "$my_dir/mm" ]; then
+ clear
+ echo
+ echo
+ echo "   Уже смонтированные образы в папке: $home_dir:"
+ cat $my_dir/mm
+
+ else
+ echo
+ echo "   Отсутствуют смонтированные образы в папке: $home_dir"
+ echo
+ fi
+
+ if [ -s "$my_dir/spars" ]; then
+ echo
+ echo "   Образы sparse в папке $home_dir:"
+ cat $my_dir/spars
+ fi
+
+ if [ ! -z "$obraz" ]; then
+ echo
+ echo "   Доступные raw-образы для монтирования. Выберите файл:"
+ echo " --------------------------------------------------------"
+ echo
+ select menu in $obraz "Выход в главное меню"; do
+case $REPLY in
+    [1-9]|[1-9][0-9]) i="$#"
+                      let i=i+1
+                      file=$(echo "$@" | busybox cut -d' ' -f"$REPLY")
+         if [ ! -z "$file" -a "$REPLY" -lt "$i" ]; then
+         clear
+         if [ -z "$(busybox hexdump -C -n 20000 "$file" | busybox grep '3a ff 26 ed')" ]; then
+          a=$(echo $file | busybox sed -e 's!./!!; s!.img!!')
+         . /data/local/binary/my_mounting
+          main_menu
+          return
+          else
+          echo
+          echo
+          echo "   $file является sparse-образом. Чтобы смонтировать, конвертируйте в raw.img."
+          main_menu
+          return
+          fi
+         main_menu
+         return
+         break
+         elif [ "$REPLY" -eq "$i" ]; then
+         clear
+        main_menu
+        return
+        break
+        else
+        clear
+        echo
+            echo "      Вводите цифры, соответствующие меню."
+         my_mount
+         return
+         break
+         fi
+         break;;
+      *) clear
+         echo
+            echo "      Вводите цифры, соответствующие меню."
+         my_mount
+         return
+         break;;
+  esac
+ done
+ 
+ else
+ echo
+ echo "   В папке: "$home_dir" нет файлов *.img, доступных для монтирования."
+ echo
+ main_menu
+ return
+ fi
+ return
+}
+
+
+        my_d()
+{
+             cd
+             echo 
+             echo "...Перейдите в папку где находятся файлы: \".img\", например: cd /sdcard"
+read b && $b
+ if [ $(echo $?) -eq 0 ]; then
+ clear
+
+ home_dir="$PWD/"
+
+ my_mount
+ return
+ else
+ echo
+ echo .....error: Ошибка перехода в директорию!
+ echo
+ echo Введите директорию правильно!
+ echo
+ my_d
+ return
+ fi
+ return
+}
+            my10(){
+            echo
+            echo "      Меню: Монтирование raw-образов *.img"
+            echo "     --------------------------------------"
+            echo
+select img in "Монтировать образ из папки: /data/local/UnpackerSystem" "Ввести путь к папке с образом .img для монтирования" "Размонтировать образ" "Выход в главное меню" "Завершение работы"; do
+case $REPLY in 
+         1 ) clear
+             home_dir="/data/local/UnpackerSystem/"
+             my_mount
+             break ;;
+         2 ) clear
+             my_d
+             break ;;
+         3 ) clear
+             sel_umount(){
+if [ -z "$file" ]; then
+         clear
+         main_menu
+         return
+      else
+          clear
+         . /data/local/binary/my_unmounting
+          main_menu
+          return
+          fi
+return
+}
+
+my_umount(){
+
+#b=$(find /data/local -maxdepth 1 -name 'system*' -o -name 'vendor*' -type d)
+
+b=$(busybox mount | cut -d" " -f3 | busybox grep -E "/data/local/vendor*|/data/local/system*")
+
+set -- $b
+
+if [ ! -z "$b" ]; then
+echo
+echo "     Выберите папку для размонтирования:"
+echo
+select menu in $b "Выход в Главное меню"; do
+case $REPLY in
+      1) file="$1"
+         clear
+         sel_umount
+         break;;
+      2) file="$2"
+         clear
+         sel_umount
+         break;;
+      3) file="$3"
+         clear
+         sel_umount
+         break;;
+      4) file="$4"
+         clear
+         sel_umount
+         break;;
+      5) file="$5"
+         clear
+         sel_umount
+         break;;
+      *) clear
+         main_menu
+         break;;
+  esac
+ done
+ else
+ echo
+ echo "     Нет папок для размонтирования."
+echo
+main_menu
+return
+fi
+return
+}
+ my_umount
+break
+             my10
+             break ;;
+         4 ) clear
+             main_menu 
+             break ;;
+         5 ) clear
+             break ;;
+         *) echo "Вводите цифру, соответствующую пунктам Меню: Монтирование образов" ;;
+    esac
+done
+return
+}
+my10
+break ;;
+         5) clear
+            my3(){
+            echo
+            echo "      Меню: Распаковка .dat"
+            echo
+select img in "Распаковать.dat" "Выход в главное меню" "Завершение работы"; do
+case $REPLY in 
+         1 ) clear
+             cd
+             echo 
+             echo "..Перейдите в папку где находятся файлы: \".dat\" и \".transfer.list\", например: cd /sdcard"
+             my_d()
+{
+read b && $b
+if [ $(echo $?) -eq 0 ]; then
+clear
+dir_dat=/data/local/binary
+ndd=$(echo $b | busybox awk '{ print $2 }' | busybox sed 's!^/!!')
+v=$(find . -maxdepth 1 -name 'vendor.new.dat' -type f -o -name 'system*.new.dat' -type f 2> /dev/null | busybox sed 's!./!!')
+
+set -- $v
+
+if [ ! -z "$v" ]; then
+echo
+echo ".....Выберите файл для распаковки:"
+echo
+select menu in $v "Выход в главное меню"; do
+case $REPLY in
+      1) file="$1"
+         if [ -z "$file" ]; then
+         clear
+         main_menu
+         return
+         break
+      else
+          clear
+         . ${dir_dat}/unpack_dat
+         main_menu
+          return
+          break
+         fi
+         break;;
+      2) file="$2"
+         if [ -z "$file" ]; then
+         clear
+         main_menu
+        return
+         break
+      else
+           clear
+         . ${dir_dat}/unpack_dat
+         main_menu
+         return
+         break
+         fi
+         break;;
+      *) clear
+         main_menu
+         return
+         break;;
+  esac
+ done
+ else
+ echo
+ echo ....."В папке \"$ndd\" нет образов \".dat\" для распаковки."
+ echo
+ main_menu
+return
+ fi
+echo
+else
+echo
+echo .....error: Ошибка перехода в директорию!
+echo
+echo Введите директорию правильно!
+echo
+my_d
+return
+fi
+return
+}
+my_d
+ break ;;
+         2 ) clear
+             main_menu
+             break ;;
+         3 ) clear
+             break ;;
+         *) clear
+            echo
+            echo ".....Вводите цифру, соответствующую этому меню."
+             my3
+            break ;;      
+    esac
+done
+return
+}
+my3
+break ;;
+         6) clear
+            my_br(){
+            echo
+            echo "      Меню: Распаковка .br"
+            echo
+select img in "Распаковать .br" "Выход в главное меню" "Завершение работы"; do
+case $REPLY in 
+         1 ) clear
+             echo 
+             echo "...Перейдите в папку где находятся файлы: \".br\" и \".transfer.list\", например: cd /sdcard"           
+              my_b()
+{
+read b && $b
+if [ $(echo $?) -eq 0 ]; then
+clear
+dir_dat=/data/local/binary
+nb=$(echo $b | busybox awk '{ print $2 }' | busybox sed 's!^/!!')
+v=$(find . -maxdepth 1 -name 'vendor*.new.dat.br' -type f -o -name 'system*.new.dat.br' -type f 2> /dev/null | busybox sed 's!./!!')
+
+set -- $v
+
+if [ ! -z "$v" ]; then
+echo
+echo ".....Выберите файл для распаковки:"
+echo
+select menu in $v "Выход в главное меню"; do
+case $REPLY in
+      1) file="$1"
+         if [ -z "$file" ]; then
+         clear
+         main_menu
+         return
+         break
+      else
+          clear
+         . ${dir_dat}/unpack_br
+         main_menu
+          return
+          break
+         fi
+         break ;;
+      2) file="$2"
+         if [ -z "$file" ]; then
+         clear
+         main_menu
+         return
+         break
+      else
+           clear
+         . ${dir_dat}/unpack_br
+         main_menu
+         return
+         break
+         fi
+         break ;;
+      *) clear
+         main_menu
+         return
+         break ;;
+  esac
+ done
+ else
+ echo
+ echo ....."В папке \"$nb\" нет образов \".br\" для распаковки."
+ echo
+ main_menu
+return
+ fi
+echo
+else
+echo
+echo .....error: Ошибка перехода в директорию!
+echo
+echo Введите директорию правильно!
+echo
+my_b
+return
+fi
+return
+}
+my_b
+              break ;;
+         2 ) clear
+             main_menu
+             break ;;
+         3 ) clear
+             break ;;
+         *) clear
+            echo
+            echo ".....Вводите цифру, соответствующую этому меню."
+             my_br
+            break ;;      
+    esac
+done
+return
+}
+my_br
+break ;;
+         7) #Сборка .img начало +++++++++++++++++
+
+dir=/data/local/binary
+cd /data/local/UnpackerSystem
+
+my_size()
+{
+clear
+echo
+echo ".....Введите размер в байтах:"
+echo
+read a && set -- "$a"  
+if [ $(echo $?) -eq 0 ]; then
+ b=$(busybox expr "$a" / 4096 \* 4096)
+ set -- "$b"
+
+ff
+return
+echo
+else
+echo
+echo ".....Ошибка!"
+echo
+my_size
+return
+fi
+return
+}
+
+ff()
+{
+clear
+  if [ "$a" = "$b" ]; then
+echo
+echo "...Собрать образ с размером: $b байт?"
+echo
+ else
+ echo
+ echo "...Введённый размер не кратен \"4096\", собрать образ с размером: $b байт?"
+ echo
+ fi
+select img in "Да" "Нет, ввести другой размер" "Выход в главное меню"; do
+case $REPLY in 
+         1 ) 
+             if [ -f config/"$pack_d"_avb.img ]; then
+    busybox cp config/"$pack_d"_avb.img config/"$pack_d"_myavb.img
+        b=$(expr "$b" - "$(stat -c %s config/"$pack_d"_myavb.img)")
+       set -- "$b"
+             fi
+             gsize=$(busybox sed -e "s!-l [0-9]*!-l "$b"!" $file_sh)
+              . $file_size
+               main_menu
+               break ;;
+         2 ) clear
+               my_size
+               return
+               break ;;
+         3 ) clear
+               main_menu
+               return
+               break ;;
+         * ) clear
+             echo
+             echo "      Вводите цифры, соответствующие этому меню."
+              ff
+              return
+              break ;;
+    esac
+done
+return
+}
+
+             pack_img_my()
+{
+b=$(find . -maxdepth 1 -name 'vendor' -type d -o -name 'system' -type d | busybox sed 's!./!!')
+
+set -- $b
+
+if [ ! -z "$b" ]; then
+echo
+echo ".....Выберите папку для сборки:"
+echo
+select menu in $b "Выход в главное меню"; do
+case $REPLY in
+      1) pack_d="$1"
+         if [ -z "$pack_d" ]; then
+         clear
+         . main_menu
+         break
+      else
+           clear
+                   size=111
+                    set -- $size
+                    file_size=${dir}/pack_img
+                    if [ -f ./config/"$pack_d"_avb.img ]; then
+         file_sh=./config/"$pack_d"*_pack_avb.sh
+        else
+         file_sh=./config/"$pack_d"*_pack_sparse.sh
+          fi
+                     my_size
+                break
+         main_menu   
+         fi
+         break;;
+      2) pack_d="$2"
+         if [ -z "$pack_d" ]; then
+         clear
+         main_menu
+         break
+      else
+                   clear
+                   size=111
+                    set -- $size
+                    file_size=${dir}/pack_img
+                    if [ -f ./config/"$pack_d"_avb.img ]; then
+         file_sh=./config/"$pack_d"*_pack_avb.sh
+        else
+         file_sh=./config/"$pack_d"*_pack_sparse.sh
+          fi
+                     my_size
+                break
+             main_menu
+          fi
+         break;;
+      *) clear
+         main_menu
+         return
+         break;;
+  esac
+ done
+ else
+ echo
+ echo ....."В \"$PWD\" нет папок для сборки."
+ echo
+ main_menu
+ return
+ fi
+return
+}
+
+pack_img_orig()
+{
+b=$(find . -maxdepth 1 -name 'vendor' -type d -o -name 'system' -type d | busybox sed 's!./!!')
+
+set -- $b
+
+if [ ! -z "$b" ]; then
+echo
+echo ".....Выберите папку для сборки:"
+echo
+select menu in $b "Выход в главное меню"; do
+case $REPLY in
+      1) pack_d="$1"
+         if [ -z "$pack_d" ]; then
+         clear
+         main_menu
+         break
+      else
+           clear
+            size=100
+         . ${dir}/pack_img
+        
+         main_menu
+         break      
+         fi
+         break;;
+      2) pack_d="$2"
+         if [ -z "$pack_d" ]; then
+         clear
+         main_menu
+         break
+      else
+           clear
+           size=100
+         . ${dir}/pack_img
+        
+         main_menu
+         break      
+         fi
+         break;;
+      *) clear
+         main_menu
+         break;;
+  esac
+ done
+ else
+ echo
+ echo ....."В \"$PWD\" нет папок для сборки."
+ echo
+ main_menu
+ return
+ fi
+return
+}
+
+pack_img_raw_orig()
+{
+b=$(find . -maxdepth 1 -name 'vendor' -type d -o -name 'system' -type d | busybox sed 's!./!!')
+
+set -- $b
+
+if [ ! -z "$b" ]; then
+echo
+echo ".....Выберите папку для сборки:"
+echo
+select menu in $b "Выход в главное меню"; do
+case $REPLY in
+      1) pack_d="$1"
+         if [ -z "$pack_d" ]; then
+         clear
+         main_menu
+         break
+      else
+           clear
+            size=100
+         . ${dir}/pack_img_raw
+         main_menu
+         break      
+         fi
+         break;;
+      2) pack_d="$2"
+         if [ -z "$pack_d" ]; then
+         clear
+         main_menu
+         break
+      else
+           clear
+           size=100
+         . ${dir}/pack_img_raw
+         main_menu
+         break      
+         fi
+         break;;
+      *) clear
+         main_menu
+         break;;
+  esac
+ done
+ else
+ echo
+ echo ....."В \"$PWD\" нет папок для сборки."
+ echo
+ main_menu
+ return
+ fi
+return
+}
+
+pack_img_raw_my()
+{
+b=$(find . -maxdepth 1 -name 'vendor' -type d -o -name 'system' -type d | busybox sed 's!./!!')
+
+set -- $b
+
+if [ ! -z "$b" ]; then
+echo
+echo ".....Выберите папку для сборки:"
+echo
+select menu in $b "Выход в главное меню"; do
+case $REPLY in
+      1) pack_d="$1"
+         if [ -z "$pack_d" ]; then
+         clear
+         main_menu
+         break
+      else
+           clear
+                   size=111
+                    set -- $size
+                    file_size=${dir}/pack_img_raw
+         if [ -f ./config/"$pack_d"_avb.img ]; then
+         file_sh=./config/"$pack_d"*_pack_avb.sh
+        else
+         file_sh=./config/"$pack_d"*_pack.sh
+          fi
+                     my_size
+                 return
+               break
+            main_menu
+         break      
+         fi
+         break;;
+      2) pack_d="$2"
+         if [ -z "$pack_d" ]; then
+         clear
+         main_menu
+         break
+      else
+                   clear
+                   size=111
+                    set -- $size
+                    file_size=${dir}/pack_img_raw
+         if [ -f ./config/"$pack_d"_avb.img ]; then
+         file_sh=./config/"$pack_d"*_pack_avb.sh
+        else
+         file_sh=./config/"$pack_d"*_pack.sh
+          fi
+             my_size
+                    return
+                   break
+                main_menu
+             break      
+          fi
+         break;;
+      *) clear
+         main_menu
+         break;;
+  esac
+ done
+ else
+ echo
+ echo ....."В \"$PWD\" нет папок для сборки."
+ echo
+ main_menu
+ return
+ fi
+return
+}
+
+
+            my5(){
+            clear
+   if [ -d ./system -o -d ./vendor ]; then
+            echo
+            echo "      Меню: Сборка .img"
+            echo
+select img in "Собрать .img(sparse)" "Собрать .img(raw)" "Запись в fs_config" "Восстановление симлинков" "Выход в главное меню" "Завершение работы"; do
+case $REPLY in 
+         1 ) clear
+             sparse_s()
+             {
+             echo
+  select img in "Собрать .img(sparse) с оригинальным размером" "Собрать .img(sparse) с вводом размера образа" "Выход в главное меню"; do
+case $REPLY in 
+                1 ) clear
+                     pack_img_orig
+                      break ;;
+                2 ) clear
+                    pack_img_my
+                     break ;;
+                3 ) clear
+                    main_menu
+                    break ;;
+                * ) clear
+            echo
+            echo "      Вводите цифры, соответствующие меню."
+            echo
+            sparse_s
+              break ;;
+esac
+done
+return
+}
+sparse_s
+break ;;
+         2 ) clear
+             raw_s()
+{
+             echo
+select img in "Собрать .img(raw) с оригинальным размером" "Собрать .img(raw) с вводом размера образа" "Выход в главное меню"; do
+case $REPLY in 
+                1 ) clear
+                    pack_img_raw_orig
+                      break ;;
+                2 ) clear
+                     pack_img_raw_my
+                     break ;;
+                3 ) clear
+                    main_menu
+                    break ;;
+                * ) clear
+            echo
+            echo "      Вводите цифры, соответствующие меню." 
+              raw_s
+              break ;;
+  esac
+ done
+return
+}
+raw_s
+break ;;
+         3) clear
+             echo
+             echo ".....Добавьте папки или файлы в распакованный образ..."
+             echo
+select img in "Запись" "Выход в главное меню"; do
+case $REPLY in
+                1 ) clear
+                   . /data/local/binary/a_atr
+                     break ;;
+                2 ) clear
+                    main_menu
+                    break ;;
+                 *) echo "Вводите цифру, соответствующую пунктам этого меню."
+  esac
+done
+break ;;  
+          4 ) clear
+             cd /data/local/UnpackerSystem
+             symlink()
+{
+b=$(find . -maxdepth 1 -name 'vendor' -type d -o -name 'system' -type d | busybox sed 's!./!!')
+
+set -- $b
+
+if [ ! -z "$b" ]; then
+echo
+echo ".....Выберите папку для восстановления симлинков:"
+echo
+select menu in $b "Выход в главное меню"; do
+case $REPLY in
+      1) pack_d="$1"
+         if [ -z "$pack_d" ]; then
+         clear
+         main_menu
+         break
+      else
+           clear
+           busybox tar -xf config/"$pack_d"_sim.tar
+if [ $(echo $?) -eq 0 ]; then
+echo
+echo ".....Успешно восстановлено!"
+echo
+else
+echo
+echo ".....Ошибка при восстановлении!"
+echo
+fi
+         main_menu
+         return
+         fi
+         break;;
+      2) pack_d="$2"
+         if [ -z "$pack_d" ]; then
+         clear
+         main_menu
+         break
+      else
+           clear
+           busybox tar -xf config/"$pack_d"_sim.tar
+if [ $(echo $?) -eq 0 ]; then
+echo
+echo ".....Успешно восстановлено!"
+echo
+else
+echo
+echo ".....Ошибка при восстановлении!"
+echo
+fi
+         main_menu
+         return
+         fi
+         break;;
+      *) clear
+         main_menu
+         return
+         break;;
+  esac
+ done
+ else
+ echo
+ echo ....."В \"$PWD\" нет папок для восстановления симлинков."
+ echo
+ main_menu
+ return
+ fi
+return
+}
+symlink
+    break ;;    
+         5 ) clear
+             main_menu
+             break ;;
+         6 ) clear
+             break ;;
+         *) echo "Вводите цифру, соответствующую пунктам Меню: Сборка sparse.img." ;;
+    esac
+done
+else
+echo
+echo ....."В \"$PWD\" нет папок для сборки."
+echo
+main_menu
+return
+fi
+return
+}
+ my5
+    break ;;          
+              #Конец функции сборки .img
+
+          8) clear
+             my6(){
+             echo
+             echo "      Меню: Сборка и конвертация в .dat"
+             echo
+select img in "Собрать .img и конвертировать в .dat" "Конвертировать \".img(sparse)\" в \".dat\"" "Выход в главное меню" "Завершение работы"; do
+case $REPLY in 
+         1 ) clear
+             pack_dat()
+{
+cd /data/local/UnpackerSystem
+dir=/data/local/binary
+b=$(find . -maxdepth 1 -name 'vendor' -type d -o -name 'system' -type d | busybox sed 's!./!!')
+
+set -- $b
+
+if [ ! -z "$b" ]; then
+echo
+echo ".....Выберите папку для сборки:"
+echo
+select menu in $b "Выход в главное меню"; do
+case $REPLY in
+      1) pack_d="$1"
+         if [ -z "$pack_d" ]; then
+         clear
+         main_menu
+         break
+      else
+           clear
+         . ${dir}/pack_img_dat
+         main_menu
+         break      
+         fi
+         break;;
+      2) pack_d="$2"
+         if [ -z "$pack_d" ]; then
+         clear
+         main_menu
+         break
+      else
+           clear
+         . ${dir}/pack_img_dat
+         main_menu
+         break      
+         fi
+         break;;
+      *) clear
+         main_menu
+         break;;
+  esac
+ done
+ else
+ echo
+ echo ....."В папке \"$PWD\" нет папок для сборки."
+ echo
+ main_menu
+ return
+ fi
+return
+}
+  pack_dat
+      break ;;
+         2 )  clear
+              my_k(){
+             echo 
+             echo "..Перейдите в папку где находится файл \".img\(sparse\)\", например: cd /sdcard"
+read b && $b
+if [ $(echo $?) -eq 0 ]; then
+clear
+dir_dat=/data/local/binary
+nd=$(echo $b | busybox awk '{ print $2 }')
+v=$(for sparse in $(busybox find . -maxdepth 1 -name 'vendor*.img' -type f -o -name 'system*.img' -type f 2> /dev/null); do
+if [ ! -z "$(busybox hexdump -C -n 4 "$sparse" | busybox grep '3a ff 26 ed')" ]; then
+echo "$sparse"
+fi
+done)
+
+set -- $v
+
+if [ ! -z "$v" ]; then
+echo
+echo ".....Показаны только \"sparse\" образы в папке:
+     \"$nd\"."
+echo ".....Выберите файл для конвертации в \".dat\":"
+echo
+select menu in $v "Выход в главное меню"; do
+case $REPLY in
+    [1-9]|[1-9][0-9]) i="$#"
+                      let i=i+1
+                      file=$(echo "$@" | busybox cut -d' ' -f"$REPLY")
+         if [ ! -z "$file" -a "$REPLY" -lt "$i" ]; then
+         clear
+         . ${dir_dat}/konvert_img_dat
+         main_menu
+         return
+         break 
+         elif [ "$REPLY" == "$i" ]; then
+         clear
+        main_menu
+        return
+        break
+        else
+        clear
+        echo
+            echo "      Вводите цифры, соответствующие меню."
+         my_k
+         return
+         break
+         fi
+         break;;
+      *) clear
+         echo
+            echo "      Вводите цифры, соответствующие меню."
+         my_k
+         return
+         break;;
+  esac
+ done
+ else
+ echo
+ echo ....."В папке \"$nd\" нет образов \".img\" для конвертации."
+ echo
+ main_menu
+return
+ fi
+echo
+else
+echo
+echo .....error: Ошибка перехода в директорию!
+echo
+echo Введите директорию правильно!
+echo
+my_k
+return
+fi
+return
+}
+ my_k
+      break ;;
+         3 ) clear
+             main_menu
+             break ;;
+         4 ) clear
+             break ;;
+         *) echo "Вводите цифру, соответствующую пунктам Меню: Сборка и конвертация в .dat." ;;
+    esac
+done
+return
+}
+ my6
+     break ;;
+         9) clear
+            my7(){
+            echo
+            echo "      Меню: Сборка и конвертация в .br"
+            echo
+select img in "Конвертировать .dat  в .br" "Собрать .img и конвертировать -> .dat -> .br" "Выход в главное меню" "Завершение работы"; do
+case $REPLY in 
+         1 ) clear
+             my_kbr(){
+             echo 
+             echo "..Перейдите в папку где находится файл \".dat\", например: cd /sdcard"
+read b && $b
+if [ $(echo $?) -eq 0 ]; then
+clear
+dir_dat=/data/local/binary
+nd=$(echo $b | busybox awk '{ print $2 }')
+v=$(find . -maxdepth 1 -name 'vendor*.new.dat' -type f -o -name 'system*.new.dat' -type f 2> /dev/null | busybox sed 's!./!!')
+
+set -- $v
+
+if [ ! -z "$v" ]; then
+echo
+echo ".....Выберите файл для конвертации:"
+echo
+select menu in $v "Выход в главное меню"; do
+case $REPLY in
+    [1-9]|[1-9][0-9]) i="$#"
+                      let i=i+1
+                      file=$(echo "$@" | busybox cut -d' ' -f"$REPLY")
+         if [ ! -z "$file" -a "$REPLY" -lt "$i" ]; then
+         clear
+       . ${dir_dat}/konvert_dat_br
+         main_menu
+         return
+         break 
+         elif [ "$REPLY" == "$i" ]; then
+         clear
+        main_menu
+        return
+        break
+        else
+        clear
+        echo
+            echo "      Вводите цифры, соответствующие меню."
+         my_kbr
+         return
+         break
+         fi
+         break;;
+      *) clear
+         echo
+            echo "      Вводите цифры, соответствующие меню."
+         my_kbr
+         return
+         break;;
+  esac
+ done
+ else
+ echo
+ echo ....."В папке \"$nd\" нет образов \".dat\" для конвертации."
+ echo
+ main_menu
+return
+ fi
+echo
+else
+echo
+echo .....error: Ошибка перехода в директорию!
+echo
+echo Введите директорию правильно!
+echo
+my_kbr
+return
+fi
+return
+}
+my_kbr
+      break ;;
+         2 ) clear
+             pack_dat_br()
+{
+cd /data/local/UnpackerSystem
+dir=/data/local/binary
+b=$(find . -maxdepth 1 -name 'vendor' -type d -o -name 'system' -type d | busybox sed 's!./!!')
+
+set -- $b
+
+if [ ! -z "$b" ]; then
+echo
+echo ".....Выберите папку для сборки:"
+echo
+select menu in $b "Выход в главное меню"; do
+case $REPLY in
+      1) pack_d="$1"
+         if [ -z "$pack_d" ]; then
+         clear
+         main_menu
+         break
+      else
+           clear
+         . ${dir}/pack_img_br
+         main_menu
+         break      
+         fi
+         break;;
+      2) pack_d="$2"
+         if [ -z "$pack_d" ]; then
+         clear
+         main_menu
+         break
+      else
+           clear
+         . ${dir}/pack_img_br
+         main_menu
+         break      
+         fi
+         break;;
+      *) clear
+         main_menu
+         break;;
+  esac
+ done
+ else
+ echo
+ echo ....."В папке \"$PWD\" нет папок для сборки."
+ echo
+ main_menu
+ return
+ fi
+return
+}
+ pack_dat_br
+      break ;;
+         3 ) clear
+             main_menu
+             break ;;
+         4 ) clear
+             break ;;
+         *) echo "Вводите цифру, соответствующую пунктам Меню: Конвертация new.dat в .br" ;;
+    esac
+done
+return
+}
+my7
+break ;;
+          10) clear
+             my8(){
+             echo 
+             echo "      Меню: Конвертация sparse > raw; raw > sparse"
+             echo
+select img in "Конвертировать .img(raw) в .img (sparse)" "Конвертировать .img(sparse) в .img(raw)" "Выход в главное меню" "Завершение работы"; do
+case $REPLY in 
+         1 ) clear
+             konv_img(){
+             echo 
+             echo "..Перейдите в папку где находится файл \".img(raw)\", например: cd /sdcard"
+read b && $b
+if [ $(echo $?) -eq 0 ]; then
+clear
+dir_dat=/data/local/binary
+nd=$(echo $b | busybox awk '{ print $2 }')
+#v=$(find . -maxdepth 1 -name 'vendor*.img' -type f -o -name 'system*.img' -type f | busybox sed 's!./!!')
+
+v=$(for raw in $(find . -maxdepth 1 -name 'vendor*.img' -type f -o -name 'system*.img' -type f 2> /dev/null); do
+if [ -z "$(busybox hexdump -C -n 4 "$raw" | busybox grep '3a ff 26 ed')" ]; then
+echo "$raw"
+fi
+done)
+
+set -- $v
+
+if [ ! -z "$v" ]; then
+echo
+echo ".....Показаны только \"raw\" образы в папке:
+     \"$nd\"."
+echo ".....Выберите файл для конвертации в \"sparse\":"
+echo
+select menu in $v "Выход в главное меню"; do
+case $REPLY in
+    [1-9]|[1-9][0-9]) i="$#"
+                      let i=i+1
+                      file=$(echo "$@" | busybox cut -d' ' -f"$REPLY")
+         if [ ! -z "$file" -a "$REPLY" -lt "$i" ]; then
+         clear
+       . ${dir_dat}/konvert_raw_sparse
+         main_menu
+         return
+         break 
+         elif [ "$REPLY" == "$i" ]; then
+         clear
+        main_menu
+        return
+        break
+        else
+        clear
+        echo
+            echo "      Вводите цифры, соответствующие меню."
+         konv_img
+         return
+         break
+         fi
+         break;;
+      *) clear
+         echo
+            echo "      Вводите цифры, соответствующие меню."
+         konv_img
+         return
+         break;;
+  esac
+ done
+ else
+ echo
+ echo ..."В папке \"$nd\" нет \"raw\" образов для конвертации."
+ echo
+ main_menu
+return
+ fi
+echo
+else
+echo
+echo .....error: Ошибка перехода в директорию!
+echo
+echo Введите директорию правильно!
+echo
+konv_img
+return
+fi
+return
+}
+  konv_img
+      break ;;
+         2 ) clear
+             konv_img(){
+             echo 
+             echo "..Перейдите в папку где находитсяся файл \".img(sparse)\", например: cd /sdcard:"
+read b && $b
+if [ $(echo $?) -eq 0 ]; then
+clear
+dir_dat=/data/local/binary
+nd=$(echo $b | busybox awk '{ print $2 }')
+v=$(for sparse in $(find . -maxdepth 1 -name 'vendor*.img' -type f -o -name 'system*.img' -type f 2> /dev/null); do
+if [ ! -z "$(busybox hexdump -C -n 4 "$sparse" | busybox grep '3a ff 26 ed')" ]; then
+echo "$sparse"
+fi
+done)
+
+set -- $v
+
+if [ ! -z "$v" ]; then
+echo
+echo ".....Показаны только \"sparse\" образы в папке:
+     \"$nd\"."
+echo ".....Выберите файл для конвертации в \"raw\":"
+echo
+select menu in $v "Выход в главное меню"; do
+case $REPLY in
+    [1-9]|[1-9][0-9]) i="$#"
+                      let i=i+1
+                      file=$(echo "$@" | busybox cut -d' ' -f"$REPLY")
+         if [ ! -z "$file" -a "$REPLY" -lt "$i" ]; then
+         clear
+       . ${dir_dat}/konvert_sparse_raw
+         main_menu
+         return
+         break 
+         elif [ "$REPLY" == "$i" ]; then
+         clear
+        main_menu
+        return
+        break
+        else
+        clear
+        echo
+            echo "      Вводите цифры, соответствующие меню."
+         konv_img
+         return
+         break
+         fi
+         break;;
+      *) clear
+         echo
+            echo "      Вводите цифры, соответствующие меню."
+         konv_img
+         return
+         break;;
+  esac
+ done
+ else
+ echo
+ echo ..."В папке \"$nd\" нет \"sparse\" образов для конвертации."
+ echo
+ main_menu
+return
+ fi
+echo
+else
+echo
+echo .....error: Ошибка перехода в директорию!
+echo
+echo Введите директорию правильно!
+echo
+konv_img
+return
+fi
+return
+}
+   konv_img
+       break ;;
+         3 ) clear
+             main_menu
+             break ;;
+         4 ) clear
+             break ;;
+         *) echo "Вводите цифру, соответствующую пунктам Меню: Конвертация sparse > raw; raw > sparse" ;;
+    esac
+done
+return
+}
+my8
+break ;;
+         11) clear
+         del_papka()
+{
+         rm -rf $del; mkdir $del; chmod 755 $del;
+
+echo 
+echo " .....Выполнена очистка папки: $del"
+echo
+return
+}
+            my9(){
+            echo
+            echo "      Меню: Очистка рабочих папок"
+            echo
+            echo -en "\E[31;47;1m"
+            echo " Перед очисткой, переместите нужные файлы в другую папку! "
+            echo -en "\E[37;0m"
+            echo -en "\E[37;1m"
+            echo
+select img in "Очистить папку: /data/local/UnpackerSystem" "Очистить папку: /data/local/UnpackerQfil" "Очистить папку: /data/local/UnpackerContexts" "Очистить папку: /data/local/UnpackerPayload" "Очистить сразу все папки" "Выход в главное меню" "Завершение работы"; do
+case $REPLY in 
+         1 ) clear
+             del=/data/local/UnpackerSystem
+             del_papka
+             main_menu
+             break ;;
+         2 ) clear
+             del=/data/local/UnpackerQfil
+             del_papka
+             main_menu
+             break ;;
+         3 ) clear
+             del=/data/local/UnpackerContexts
+             del_papka
+             main_menu
+             break ;;
+         4 ) clear
+             del=/data/local/UnpackerPayload
+             del_papka
+             main_menu
+             break ;;
+         5 ) clear
+            del_dir=/data/local/Unpacker
+ for del_all in "$del_dir"Contexts "$del_dir"System "$del_dir"Qfil "$del_dir"Payload; do
+ rm -rf $del_all; mkdir $del_all; chmod 755 $del_all
+ done
+ echo 
+ echo " .....Выполнена очистка всех рабочих папок."
+ echo
+             main_menu
+             break ;;
+         6 ) clear
+             main_menu
+             break ;;
+         7 ) clear
+             break ;;
+         *) echo "Вводите цифру, соответствующую пунктам Меню: Очистка рабочих папок" ;;
+    esac
+done
+return
+}
+my9
+break ;;
+         12) clear
+             del_unpack()
+{
+echo
+echo -en "\E[31;47;1m"
+echo "     Удалить \"Unpacker Kitchen for Android\" с телефона?     "
+echo -en "\E[37;0m"
+echo -en "\E[37;1m"
+echo
+select img in "Да" "Нет,выйти в главное меню"; do
+case $REPLY in 
+         1 ) clear
+              if [ -d /data/local/AIK-mobile ]; then
+               /data/local/AIK-mobile/cleanup.sh
+     echo
+     echo ".....Удаление AIK-mobile..."
+busybox mount -o rw,remount /
+busybox mount -o rw,remount /system
+  busybox find $(echo $PATH | busybox sed 's!:! !g') -name 'aik' -type f -o -iname 'aik-mobile' -type d | busybox xargs rm -rf
+rm -rf /data/local/AIK-mobile
+if [ $(echo $?) -eq 0 ] ; then
+echo
+echo ".....AIK-mobile удалён!"
+echo
+fi
+fi
+if [ -f /data/local/binary/UninstallerUnpack.zip ]; then
+busybox cp -f /data/local/binary/UninstallerUnpack.zip /cache/recovery/UninstallerUnpack.zip
+echo "install cache/recovery/UninstallerUnpack.zip" > /cache/recovery/openrecoveryscript
+echo
+echo
+echo -ne "        Перезагрузка через 5 сек      \r"
+sleep 1
+echo -ne "         ..... 5 .....                \r"
+sleep 1
+echo -ne "          .... 4 ....                 \r"
+sleep 1
+echo -ne "           ... 3 ...                  \r"
+sleep 1
+echo -ne "            .. 2 ..                   \r"
+sleep 1
+echo -ne "             . 1 .                    \r"
+sleep 1
+echo -ne "                                      \r"
+reboot recovery
+fi
+               main_menu
+               break ;;
+         2 ) clear
+               main_menu
+               break ;;
+         * ) clear
+            echo
+            echo "      Вводите цифры, соответствующие этому меню."
+              del_unpack
+              break ;;
+    esac
+done
+return
+}
+del_unpack
+break ;;
+
+         13) clear
+             break ;;
+         *) echo "Вводите цифру, соответствующую пунктам меню." ;;
+    esac
+done
+return
+}
+main_menu
